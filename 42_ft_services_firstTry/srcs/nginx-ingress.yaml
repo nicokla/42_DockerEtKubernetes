@@ -1,0 +1,132 @@
+# Source : https://github.com/helm/charts/blob/master/stable/nginx-ingress/values.yaml
+
+controller:
+  name: controller
+  image:
+    repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+    tag: "0.26.1"
+    pullPolicy: IfNotPresent
+    runAsUser: 33 # www-data -> uid 33
+    allowPrivilegeEscalation: true
+  containerPort:
+    http: 80
+    https: 443
+  config: {}
+  proxySetHeaders: {}
+  addHeaders: {}
+  hostNetwork: false
+  dnsPolicy: ClusterFirst
+  reportNodeInternalIp: false
+
+  daemonset:
+    useHostPort: false
+    hostPorts:
+      http: 80
+      https: 443
+  defaultBackendService: ""
+  electionID: ingress-controller-leader
+  ingressClass: nginx
+  podLabels: {}
+  podSecurityContext: {}
+  publishService:
+    enabled: false
+    pathOverride: ""
+  scope:
+    enabled: false
+    namespace: ""
+  configMapNamespace: ""
+  tcp:
+    configMapNamespace: ""
+  udp:
+    configMapNamespace: ""
+  extraArgs: {}
+  extraEnvs: []
+  kind: Deployment
+  updateStrategy: {}
+  minReadySeconds: 0
+  tolerations: []
+  affinity: {}
+  terminationGracePeriodSeconds: 60
+  nodeSelector: {}
+
+  livenessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+    port: 10254
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+    port: 10254
+
+  podAnnotations: {}
+  replicaCount: 1
+  minAvailable: 1
+  resources: {}
+
+  customTemplate:
+    configMapName: ""
+    configMapKey: ""
+
+  service:
+    enabled: true
+
+    annotations: {}
+    labels: {}
+    omitClusterIP: false
+    externalIPs: []
+
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+
+    enableHttp: true
+    enableHttps: true
+
+    externalTrafficPolicy: ""
+    healthCheckNodePort: 0
+    ports:
+      http: 80
+      https: 443
+    targetPorts:
+      http: http
+      https: https
+    type: NodePort
+    nodePorts:
+      http: 32080
+      https: 32443
+      tcp:
+        8080: 32808
+
+  extraContainers: []
+  extraVolumeMounts: []
+  extraVolumes: []
+  extraInitContainers: []
+  admissionWebhooks:
+    enabled: false
+  priorityClassName: ""
+  metrics:
+    enabled: false
+
+revisionHistoryLimit: 10
+
+defaultBackend:
+  enabled: false
+
+rbac:
+  create: true
+
+podSecurityPolicy:
+  enabled: false
+
+serviceAccount:
+  create: true
+  name:
+
+imagePullSecrets: []
+tcp: {}
+udp: {}

@@ -1,0 +1,16 @@
+secretGenerator:
+- name: mysql-pass
+  literals:
+  - password=password
+configMapGenerator:
+- name: telegraf-config-map
+  files:
+    - telegraf/telegraf.conf
+resources:
+- nginx.yaml
+- mysql.yaml
+- wordpress.yaml
+- phpmyadmin.yaml
+- ftps.yaml
+- ingress.yaml
+- telegraf.yaml

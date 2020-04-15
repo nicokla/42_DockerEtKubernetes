@@ -1,0 +1,161 @@
+// ---------------------------------------------
+// -----------    run the dockerfile     --------
+// ---------------------------------------------
+
+cd ~/Desktop/ft_server
+
+docker-machine ls
+docker-machine start default
+docker-machine create --driver virtualbox default
+eval $(docker-machine env default)
+
+docker build -t my_image2 .
+docker run -tid --rm --privileged --name my_container2 -p 80:80 -p 3306:3306 -p 8080:8080 -p 33060:33060 -p 443:443 my_image2
+192.168.99.100
+https://192.168.99.100
+
+docker container stop my_container2
+docker rmi my_image2
+docker-machine rm default
+
+
+/--------------------------------------
+
+docker exec -ti my_container2 sh
+cat /var/log/nginx/error.log
+cat /etc/php/7.1/fpm/pool.d/www.conf
+listen = /run/php/php7.1-fpm.sock
+service php7.1-fpm stop
+service php7.1-fpm start
+cd /run/php && ls -la
+which php-fpm7.1
+/usr/sbin/php-fpm7.1
+...
+docker-machine ip
+192.168.99.100
+192.168.99.100/wp-admin/install.php
+192.168.99.100/phpmyadmin
+...
+docker container ls
+docker container stop my_container
+docker image ls
+docker image rm my_image
+
+
+
+
+
+
+
+
+-------------------------------------
+---------- rappel commandes docker ------------
+-------------------------------------
+
+docker-machine create --driver virtualbox default
+eval $(docker-machine env default) 
+
+docker-machine ls
+docker-machine stop default
+docker-machine start default
+docker-machine rm default
+docker-machine ip default
+
+
+docker ps -a
+docker images
+docker history myname
+docker rm -f test
+docker image ls
+docker rmi myname
+docker system prune
+docker run --rm ...
+
+-----------------------------
+
+docker build -t my_image .
+docker run -tid --name my_container -p 80:80 my_image
+docker-machine ip default
+http://192.168.99.100:8080/
+docker ps -a
+docker stop 13efe4d167e9
+docker rm 13efe4d167e9
+docker images
+docker rmi oldname
+--cap-add=NET_ADMIN
+
+
+
+
+
+
+-------------------------------------
+---------- ln -s de l'image .docker ------------
+-------------------------------------
+
+docker-machine ls
+docker-machine create --driver virtualbox default
+mv ~/.docker /sgoinfre/goinfre/Perso/nklarsfe/.docker
+ln -s /sgoinfre/goinfre/Perso/nklarsfe/.docker ~/.docker
+# ls -al ~/|less
+# rm -rf ~/.docker
+# ls -al ~/Library/Containers/com.docker.docker/Data/com.docker.driver.amd64-linux/|less
+# rm -rf ~/Library/Containers/com.docker.docker/Data/com.docker.driver.amd64-linux/Docker.qcow2
+# ln -s /sgoinfre/goinfre/Perso/nklarsfe/.docker ~/Library/Containers/com.docker.docker/Data/com.docker.driver.amd64-linux/Docker.qcow2
+eval $(docker-machine env default) 
+
+docker-machine ls
+docker-machine create --driver virtualbox default
+mv ~/.docker /tmp/.docker
+ln -s /tmp/.docker ~/.docker
+ln -s /tmp/.docker ~/Library/Containers/com.docker.docker/Data/com.docker.driver.amd64-linux/Docker.qcow2
+
+cd /sgoinfre/goinfre/Perso/nklarsfe/
+find . -maxdepth 1 -mindepth 1 -type d -exec du -hs {} \;
+# chmod g+rwx .docker -R
+
+docker-machine ls
+docker-machine start default
+eval $(docker-machine env default)
+
+
+
+// ---------------------------------------------
+// -----------   tutoriels youtube &co    --------
+// ---------------------------------------------
+# https://www.youtube.com/watch?v=YFl2mCHdv24
+
+FROM php:7.0-apache
+COPY srcs/ /var/www/html
+EXPOSE 80
+
+<?php
+echo "Hello, World";
+
+docker build -t hello-world .
+docker run -p 80:80 hello-world
+docker run -p 80:80 -v /Users/nklarsfe/Desktop/ft_server/src/:/var/www/html/ hello-world
+
+-------------------
+# https://hub.docker.com/_/nginx
+FROM nginx
+COPY src/ /usr/share/nginx/html
+
+docker build -t some-content-nginx .
+docker run --name some-nginx -d some-content-nginx
+docker run --name some-nginx -d -p 8080:80 some-content-nginx
+docker-machine ls
+docker images
+http://192.168.99.100:8080/
+http://localhost:8080
+
+
+-----------------------------------
+# https://www.youtube.com/watch?v=Ik_mC7JSJ-A
+
+docker build -t myname .
+docker run -tid --name test myname
+docker exec -ti test sh
+^D
+docker rm -f test
+docker rmi myname

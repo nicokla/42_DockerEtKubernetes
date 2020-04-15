@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  type: NodePort
+  ports:
+  - port: 32080
+    # nodePort: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 32443
+    # nodePort: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  - port: 32022
+    nodePort: 32022
+    targetPort: 22
+    protocol: TCP
+    name: ssh
+  selector:
+    app: nginx
+  externalName: ng.inx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      # volumes:
+      # - name: secret-volume-ssl
+      #   secret:
+      #     secretName: ssl-keys
+      # - name: secret-volume-ssh
+      #   secret:
+      #     secretName: ssh-keys
+      # - name: configmap-volume
+      #   configMap:
+      #     name: nginx-config-map
+      containers:
+      - name: nginx
+        image: nginx_ssh
+        imagePullPolicy: Never
+        livenessProbe:
+          httpGet:
+            path: /index.html
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+        # volumeMounts:
+        # - mountPath: /etc/nginx/ssl
+        #   name: secret-volume-ssl
+        # - mountPath: /etc/ssh
+        #   name: secret-volume-ssh
+        # - mountPath: /etc/nginx
+        #   name: configmap-volume

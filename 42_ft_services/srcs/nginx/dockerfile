@@ -1,0 +1,69 @@
+FROM nginx:1.17.6-alpine
+
+# --------------
+# --> nginx
+
+# COPY proxy_params /etc/nginx/
+# COPY default.conf /etc/nginx/conf.d/
+COPY nginx.conf /etc/nginx
+RUN chown -R nginx:nginx /usr/share/nginx;
+COPY index.html /usr/share/nginx/html
+RUN mkdir /etc/nginx/ssl
+COPY keys/nginx.crt /etc/nginx/ssl
+COPY keys/nginx.key /etc/nginx/ssl
+RUN chmod 600 /etc/nginx/ssl/nginx.key
+RUN chmod 644 /etc/nginx/ssl/nginx.crt
+
+# SSL keys were created with :
+# openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+# -subj '/C=FR/ST=75/L=Paris/O=42/CN=name' \
+# -keyout nginx.key -out nginx.crt;
+
+# ---> Alternative to COPY :
+# - create secret containing the files (cf setup.sh)
+# - mount the secret where the keys should be (cf nginx.yaml)
+
+# --------------
+# --> ssh
+
+RUN apk add --no-cache openrc nginx openssh-server; \
+	rc-update add sshd; \
+	echo "root:password" | chpasswd;
+COPY sshd_config /etc/ssh/
+COPY keys/ssh_host_dsa_key /etc/ssh/
+COPY keys/ssh_host_dsa_key.pub /etc/ssh/
+COPY keys/ssh_host_rsa_key /etc/ssh/
+COPY keys/ssh_host_rsa_key.pub /etc/ssh/
+RUN chmod 600 /etc/ssh/ssh_host_dsa_key
+RUN chmod 644 /etc/ssh/ssh_host_dsa_key.pub
+RUN chmod 600 /etc/ssh/ssh_host_rsa_key
+RUN chmod 644 /etc/ssh/ssh_host_rsa_key.pub
+
+# SSH keys were created with :
+# ssh-keygen -f /etc/ssh/ssh_host_dsa_key -N '' -t dsa;
+# ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N '' -t rsa; 
+
+
+# --------------
+# --> telegraf
+
+COPY telegraf.tar.gz .
+COPY telegraf.conf /etc/telegraf/
+RUN tar -C . -xzf telegraf.tar.gz; \
+	chmod +x telegraf/*; \
+	cp telegraf/telegraf /usr/bin/; \
+	rm -rf *.tar.gz* telegraf/
+
+RUN rm /var/log/nginx/access.log; \
+	touch /var/log/nginx/access.log;
+
+
+# --------------
+# --> startup script
+
+COPY nginx.sh /usr/local/bin
+
+EXPOSE 80 443 32022
+ENTRYPOINT ["nginx.sh"]
+
+CMD ["tail", "-F", "/var/log/nginx/access.log"]
